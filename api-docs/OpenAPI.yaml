@@ -1,0 +1,325 @@
+openapi: 3.0.0
+info:
+  title: Mood Tracking API
+  description: API для управления записями о настроении пользователя и предоставления доступа врачу.
+  version: 1.0.0
+servers:
+  - url: https://api.example.com
+    description: Основной сервер
+
+paths:
+  /api/register:
+    post:
+      summary: Регистрация нового пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: example@example.com
+                password:
+                  type: string
+                  example: password123
+                confirm_password:
+                  type: string
+                  example: password123
+                role:
+                  type: string
+                  enum: [user, doctor]
+                  example: user
+      responses:
+        '201':
+          description: Успешная регистрация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User successfully registered
+        '400':
+          description: Неверные или отсутствующие данные
+        '500':
+          description: Ошибка сервера
+
+  /api/login:
+    post:
+      summary: Авторизация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: example@example.com
+                password:
+                  type: string
+                  example: password123
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: JWT_TOKEN
+        '401':
+          description: Неверные данные для входа
+
+  /api/mood-records:
+    get:
+      summary: Получение всех записей о настроении пользователя
+      parameters:
+        - in: query
+          name: start_date
+          required: true
+          schema:
+            type: string
+            format: date
+            example: 2025-06-01
+        - in: query
+          name: end_date
+          required: true
+          schema:
+            type: string
+            format: date
+            example: 2025-06-09
+        - in: query
+          name: emotion
+          required: false
+          schema:
+            type: string
+            example: happy
+      responses:
+        '200':
+          description: История записей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                      example: 2025-06-09
+                    emotions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          icon:
+                            type: string
+                            example: happy
+                          intensity:
+                            type: integer
+                            example: 4
+                    notes:
+                      type: string
+                      example: Feeling okay today, but a bit tired.
+        '400':
+          description: Некорректный формат данных или параметры
+        '404':
+          description: Записи не найдены
+
+  /api/mood-stats:
+    get:
+      summary: Получение статистики по настроению
+      parameters:
+        - in: query
+          name: start_date
+          required: true
+          schema:
+            type: string
+            format: date
+            example: 2025-06-01
+        - in: query
+          name: end_date
+          required: true
+          schema:
+            type: string
+            format: date
+            example: 2025-06-09
+      responses:
+        '200':
+          description: Статистика по настроению
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  emotions_percentage:
+                    type: object
+                    properties:
+                      happy:
+                        type: integer
+                        example: 60
+                      sad:
+                        type: integer
+                        example: 30
+                      angry:
+                        type: integer
+                        example: 10
+                  emotion_trends:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                          example: 2025-06-01
+                        emotion:
+                          type: string
+                          example: happy
+                        intensity:
+                          type: integer
+                          example: 3
+        '400':
+          description: Некорректный формат данных или параметры
+        '404':
+          description: Статистика не найдена
+
+  /api/patient-access:
+    post:
+      summary: Предоставление доступа врачу к записям пациента
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctor_id:
+                  type: string
+                  example: doctor123
+      responses:
+        '200':
+          description: Доступ предоставлен врачу
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Access granted to doctor
+        '404':
+          description: Врач не найден
+
+  /api/patients/{patient_id}/mood-records:
+    get:
+      summary: Получение записей о настроении пациента для врача
+      parameters:
+        - in: path
+          name: patient_id
+          required: true
+          schema:
+            type: string
+            example: patient123
+      responses:
+        '200':
+          description: Записи о настроении пациента
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                      example: 2025-06-09
+                    emotions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          icon:
+                            type: string
+                            example: happy
+                          intensity:
+                            type: integer
+                            example: 4
+                    notes:
+                      type: string
+                      example: Patient is feeling well today.
+        '404':
+          description: Пациент не найден или записи не существуют
+
+  /api/mood-records/{record_id}:
+    delete:
+      summary: Удаление записи о настроении
+      parameters:
+        - in: path
+          name: record_id
+          required: true
+          schema:
+            type: string
+            example: record123
+      responses:
+        '200':
+          description: Запись успешно удалена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Mood record deleted successfully
+        '404':
+          description: Запись не найдена
+
+  /api/users/{user_id}:
+    delete:
+      summary: Удаление аккаунта пользователя
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            example: user123
+      responses:
+        '200':
+          description: Аккаунт пользователя удален
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User account deleted successfully
+        '404':
+          description: Пользователь не найден
+
+  /api/logout:
+    post:
+      summary: Выход из аккаунта
+      responses:
+        '200':
+          description: Успешный выход из аккаунта
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Successfully logged out
+
