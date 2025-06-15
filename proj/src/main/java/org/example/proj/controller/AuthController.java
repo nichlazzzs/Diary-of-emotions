@@ -1,4 +1,5 @@
 package org.example.proj.controller;
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.proj.dto.RegisterRequest;
 import org.example.proj.entity.User;
 import org.example.proj.repository.UserRepository;
@@ -6,6 +7,7 @@ import org.example.proj.security.JwtService;
 import org.example.proj.dto.LoginRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,13 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -75,7 +76,6 @@ public class AuthController {
         ));
     }
 
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         Optional<User> optionalUser = userRepository.findByUsername(request.getUsername());
@@ -95,5 +95,22 @@ public class AuthController {
         String token = jwtService.generateToken(user);
 
         return ResponseEntity.ok(Map.of("token", token));
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+
+        final String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            final String token = authHeader.substring(7);
+
+            jwtService.invalidateToken(token);
+        }
+
+        SecurityContextHolder.clearContext();
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Logged out successfully",
+                "status", 200
+        ));
     }
 }
