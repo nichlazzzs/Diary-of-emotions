@@ -22,11 +22,13 @@ public class JwtService {
     private final Set<String> tokenBlacklist = new HashSet<>();
 
     public String generateToken(User user) {
+        Claims claims = Jwts.claims().setSubject(user.getUsername());
+        claims.put("roles", user.getRoles()); // Добавляем роли в токен
+
         return Jwts.builder()
-                .setSubject(user.getUsername())
-                .claim("email", user.getEmail())
+                .setClaims(claims)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 604800000)) // 7 дней
+                .setExpiration(new Date(System.currentTimeMillis() + 604800000))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
