@@ -3,6 +3,7 @@ package org.example.proj.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.Data;
 import org.example.proj.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Service
+@Data
 public class JwtService {
 
     @Value("${jwt.secret}")
@@ -49,11 +51,11 @@ public class JwtService {
         tokenBlacklist.add(token);
     }
 
-    private boolean isTokenBlacklisted(String token) {
+    public boolean isTokenBlacklisted(String token) {
         return tokenBlacklist.contains(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
     }
 
