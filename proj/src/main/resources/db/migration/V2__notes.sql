@@ -20,3 +20,15 @@ CREATE TABLE notes (
      CONSTRAINT fk_notes_user FOREIGN KEY (userId) REFERENCES users(UserID),
      CONSTRAINT fk_notes_emotion FOREIGN KEY (emotionId) REFERENCES emotions(emotionId)
 );
+
+CREATE TABLE note_arguments_for (
+                                    note_id INTEGER NOT NULL,
+                                    argument TEXT NOT NULL,
+                                    FOREIGN KEY (note_id) REFERENCES notes(noteid) ON DELETE CASCADE
+);
+
+CREATE TABLE note_arguments_against (
+                                        note_id INTEGER NOT NULL,
+                                        argument TEXT NOT NULL,
+                                        FOREIGN KEY (note_id) REFERENCES notes(noteid) ON DELETE CASCADE
+);
