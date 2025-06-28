@@ -4,6 +4,7 @@ import org.example.proj.entity.Note;
 import org.example.proj.entity.User;
 import org.example.proj.repository.NoteRepository;
 import org.example.proj.repository.UserRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
@@ -58,4 +59,13 @@ public class NoteController {
         note.setIsActive(false);
         noteRepository.save(note);
     }
+
+    @GetMapping("/patient/{patientId}")
+    @PreAuthorize("@accessService.hasAccess(principal, #patientId)")
+    public List<Note> getNotesForPatient(@PathVariable Long patientId) {
+        User patient = userRepository.findById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        return noteRepository.findByUser(patient);
+    }
+
 }
