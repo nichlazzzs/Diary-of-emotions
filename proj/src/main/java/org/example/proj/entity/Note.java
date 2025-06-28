@@ -13,6 +13,7 @@ import jakarta.persistence.CollectionTable;
 
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,34 +22,50 @@ import java.util.List;
 public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "noteid")
     private Long noteId;
 
     private String event;
 
     @ElementCollection
-    @CollectionTable(name = "note_arguments_for", joinColumns = @JoinColumn(name = "note_id"))
+    @CollectionTable(
+            name = "note_arguments_for",
+            joinColumns = @JoinColumn(name = "note_id")
+    )
     @Column(name = "argument")
-    private List<String> argumentsFor;
+    private List<String> argumentsFor = new ArrayList<>();
 
     @ElementCollection
-    @CollectionTable(name = "note_arguments_against", joinColumns = @JoinColumn(name = "note_id"))
+    @CollectionTable(
+            name = "note_arguments_against",
+            joinColumns = @JoinColumn(name = "note_id")
+    )
     @Column(name = "argument")
-    private List<String> argumentsAgainst;
+    private List<String> argumentsAgainst = new ArrayList<>();
 
+    @Column(name = "adaptive_response")
     private String adaptiveResponse;
+
     private String behavior;
+
+    @Column(name = "is_active")
     private Boolean isActive = true;
+
+    @Column(name = "body_sensations")
     private String bodySensations;
+
     private String conclusion;
+
+    @Column(name = "auto_thought")
     private String autoThought;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "userid", nullable = false)
     private User user;
 
     private LocalDateTime date;
 
     @ManyToOne
-    @JoinColumn(name = "emotionId")
+    @JoinColumn(name = "emotionid")
     private Emotion emotion;
 }
